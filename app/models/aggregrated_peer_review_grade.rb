@@ -1,3 +1,5 @@
+require "csv"
+
 class AggregratedPeerReviewGrade < ActiveRecord::Base
 	def self.calculate
 		iterator = 1
@@ -29,6 +31,43 @@ class AggregratedPeerReviewGrade < ActiveRecord::Base
 											   aggregrated_peer_review_grade: aggregrated_peer_review_grade)
 			iterator += 1
 			print '.' if index % 100 == 0
+		end
+	end
+
+	def self.convert_peer_review_results_in_each_task_to_csv
+		peer_review_results = AggregratedPeerReviewGrade.where(create_in_task_id: 'EZ-00005551')
+		assessee_actor_ids = Array.new
+		assessor_actor_ids = Array.new
+		peer_review_matrix = Hash.new
+		peer_review_results.each do |result|
+			assessee_actor_ids << result.assessee_actor_id unless assessee_actor_ids.include? result.assessee_actor_id
+			assessor_actor_ids << result.assessor_actor_id unless assessor_actor_ids.include? result.assessor_actor_id
+
+			peer_review_matrix[result.assessee_actor_id] = Hash.new unless peer_review_matrix.has_key?(result.assessee_actor_id)
+			peer_review_matrix[result.assessee_actor_id][result.assessor_actor_id] = result.aggregrated_peer_review_grade
+		end
+
+		assessor_actor_ids.sort!
+		assessee_actor_ids.sort!
+
+		CSV.open("EZ-00005551.csv", "wb") do |csv|
+		  #csv << ["animal", "count", "price"]
+		  #csv << ["fox", "1", "$90.00"]
+		  assessor_actor_ids.unshift(nil)
+		  csv << assessor_actor_ids
+		  assessor_actor_ids.delete_at(0)
+		  assessee_actor_ids.each do |assessee_actor_id|
+	  		temp_array = Array.new
+	  		temp_array << assessee_actor_id
+		  	assessor_actor_ids.each do |assessor_actor_id|
+		  		if peer_review_matrix[assessee_actor_id].has_key? assessor_actor_id
+		  			temp_array << peer_review_matrix[assessee_actor_id][assessor_actor_id]
+		  		else
+		  			temp_array << nil
+		  		end
+		  	end
+		  	csv << temp_array
+		  end
 		end
 	end
 end

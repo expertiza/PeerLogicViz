@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   def index
-  	AggregratedPeerReviewGrade.calculate
+  	#AggregratedPeerReviewGrade.calculate
+  	AggregratedPeerReviewGrade.convert_peer_review_results_in_each_task_to_csv
   end
 end
