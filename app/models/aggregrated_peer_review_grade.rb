@@ -1,9 +1,11 @@
 class AggregratedPeerReviewGrade < ActiveRecord::Base
 	def self.calculate
 		iterator = 1
-		answers_with_distinct_assessee_actor_id = Answer.group(:assessee_actor_id)
+		answers_with_distinct_assessee_actor_id = Answer.group(:assessor_actor_id, :assessee_actor_id, :create_in_task_id)
 		answers_with_distinct_assessee_actor_id.each_with_index do |answer, index|
-			answers_for_certain_artifact = Answer.where(assessee_actor_id: answer.assessee_actor_id)
+			answers_for_certain_artifact = Answer.where(assessor_actor_id: answer.assessor_actor_id,
+														assessee_actor_id: answer.assessee_actor_id,
+														create_in_task_id: answer.create_in_task_id)
 			total_score_for_one_rubric = 0
 			peer_review_grade = 0
 			answers_for_certain_artifact.each do |a|
@@ -26,7 +28,7 @@ class AggregratedPeerReviewGrade < ActiveRecord::Base
 											   create_in_task_id: answer.create_in_task_id, 
 											   aggregrated_peer_review_grade: aggregrated_peer_review_grade)
 			iterator += 1
-			print '.' if index % 50 == 0
+			print '.' if index % 100 == 0
 		end
 	end
 end
