@@ -5,6 +5,6 @@ class ApplicationController < ActionController::Base
 
   def index
   	#AggregratedPeerReviewGrade.calculate
-  	AggregratedPeerReviewGrade.convert_peer_review_results_in_each_task_to_csv
+  	AggregratedPeerReviewGrade.convert_peer_review_results_in_each_task_to_csv(['EZ-00005397','EZ-00005399'])
   end
 end

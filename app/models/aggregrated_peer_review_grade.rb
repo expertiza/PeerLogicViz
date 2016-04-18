@@ -34,23 +34,30 @@ class AggregratedPeerReviewGrade < ActiveRecord::Base
 		end
 	end
 
-	def self.convert_peer_review_results_in_each_task_to_csv
-		peer_review_results = AggregratedPeerReviewGrade.where(create_in_task_id: 'EZ-00005551')
+	def self.convert_peer_review_results_in_each_task_to_csv(create_in_task_ids)
 		assessee_actor_ids = Array.new
 		assessor_actor_ids = Array.new
 		peer_review_matrix = Hash.new
-		peer_review_results.each do |result|
-			assessee_actor_ids << result.assessee_actor_id unless assessee_actor_ids.include? result.assessee_actor_id
-			assessor_actor_ids << result.assessor_actor_id unless assessor_actor_ids.include? result.assessor_actor_id
-
-			peer_review_matrix[result.assessee_actor_id] = Hash.new unless peer_review_matrix.has_key?(result.assessee_actor_id)
-			peer_review_matrix[result.assessee_actor_id][result.assessor_actor_id] = result.aggregrated_peer_review_grade
+		create_in_task_ids.each do |create_in_task_id|
+			peer_review_results = AggregratedPeerReviewGrade.where(create_in_task_id: create_in_task_id)
+			peer_review_results.each do |result|
+				assessee_actor_ids << result.assessee_actor_id unless assessee_actor_ids.include? result.assessee_actor_id
+				@participant_id = ActorParticipant.where(actor_id: result.assessor_actor_id).first.participant_id
+				assessor_actor_ids << @participant_id unless assessor_actor_ids.include? @participant_id
+				peer_review_matrix[result.assessee_actor_id] = Hash.new unless peer_review_matrix.has_key?(result.assessee_actor_id)
+				peer_review_matrix[result.assessee_actor_id][@participant_id] = result.aggregrated_peer_review_grade
+			end
 		end
-
 		assessor_actor_ids.sort!
 		assessee_actor_ids.sort!
 
-		CSV.open("EZ-00005551.csv", "wb") do |csv|
+		file_name = ''
+		create_in_task_ids.each_with_index do |id, index| 
+			file_name += id
+			file_name += '-' if index != create_in_task_ids.length - 1
+		end
+
+		CSV.open("#{file_name}.csv", "wb") do |csv|
 		  #csv << ["animal", "count", "price"]
 		  #csv << ["fox", "1", "$90.00"]
 		  assessor_actor_ids.unshift(nil)
