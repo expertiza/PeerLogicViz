@@ -2,7 +2,9 @@ require "csv"
 
 class AggregratedPeerReviewGrade < ActiveRecord::Base
 	def self.calculate
-		iterator = 1
+		iterator = AggregratedPeerReviewGrade.maximum(:id).next
+		# task_ids = ['EZ-00005578', 'EZ-00005579', 'EZ-00005580', 'EZ-00005581']
+		# answers_with_distinct_assessee_actor_id = Answer.where(["create_in_task_id in (?)", task_ids]).group(:assessor_actor_id, :assessee_actor_id, :create_in_task_id)
 		answers_with_distinct_assessee_actor_id = Answer.group(:assessor_actor_id, :assessee_actor_id, :create_in_task_id)
 		answers_with_distinct_assessee_actor_id.each_with_index do |answer, index|
 			answers_for_certain_artifact = Answer.where(assessor_actor_id: answer.assessor_actor_id,

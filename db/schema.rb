@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160409170108) do
+ActiveRecord::Schema.define(version: 20160412180100) do
 
   create_table "actor_participants", id: false, force: :cascade do |t|
     t.string "actor_id",       limit: 20, null: false
@@ -22,6 +22,13 @@ ActiveRecord::Schema.define(version: 20160409170108) do
 
   create_table "actors", force: :cascade do |t|
     t.string "role", limit: 63
+  end
+
+  create_table "aggregrated_peer_review_grades", force: :cascade do |t|
+    t.string "assessor_actor_id",             limit: 20
+    t.string "assessee_actor_id",             limit: 20
+    t.string "create_in_task_id",             limit: 20
+    t.float  "aggregrated_peer_review_grade", limit: 24
   end
 
   create_table "answers", force: :cascade do |t|
@@ -66,8 +73,7 @@ ActiveRecord::Schema.define(version: 20160409170108) do
     t.string "description", limit: 255
   end
 
-  create_table "expert_grades", id: false, force: :cascade do |t|
-    t.string "actor_id",           limit: 20
+  create_table "expert_grades", primary_key: "actor_id", force: :cascade do |t|
     t.float  "expert_grade",       limit: 24
     t.string "assignment_title",   limit: 255
     t.string "course_title",       limit: 255
